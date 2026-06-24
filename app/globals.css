@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #855050;
+  --color-primary-dark: #6a3939;
+  --color-secondary: #954647;
+  --color-surface: #fff8f7;
+  --color-surface-card: #FAF7F5;
+  --color-outline-variant: #d6c2c1;
+  --color-on-surface: #271718;
+  --color-on-surface-variant: #524343;
+}
+
+body {
+  font-family: var(--font-dm-sans), sans-serif;
+  color: var(--color-on-surface);
+  background: var(--color-surface);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-eb-garamond), serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
