@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: '3INAYA | عناية — Beauty & Rituals du Maroc',
   description:
     "Découvrez l'art du rituel de beauté marocain avec 3INAYA. Huile d'argan, ghassoul, eau de rose, savon beldi et coffrets cadeaux artisanaux.",
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
