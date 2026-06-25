@@ -26,6 +26,10 @@ export function getStatutColor(statut: string): string {
     expediee: 'bg-purple-100 text-purple-800',
     livree: 'bg-green-100 text-green-800',
     annulee: 'bg-red-100 text-red-800',
+    pending: 'bg-amber-100 text-amber-800',
+    confirmed: 'bg-blue-100 text-blue-800',
+    delivered: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
   }
   return colors[statut] || 'bg-gray-100 text-gray-800'
 }
@@ -33,18 +37,22 @@ export function getStatutColor(statut: string): string {
 export function getStatutLabel(statut: string): string {
   const labels: Record<string, string> = {
     en_attente: 'En attente',
-    confirmee: 'Confirmée',
-    expediee: 'Expédiée',
-    livree: 'Livrée',
-    annulee: 'Annulée',
+    confirmee: 'Confirmee',
+    expediee: 'Expediee',
+    livree: 'Livree',
+    annulee: 'Annulee',
+    pending: 'En attente',
+    confirmed: 'Confirmee',
+    delivered: 'Livree',
+    cancelled: 'Annulee',
   }
   return labels[statut] || statut
 }
 
 export const STATUTS = [
   { value: 'en_attente', label: 'En attente' },
-  { value: 'confirmee', label: 'Confirmée' },
-  { value: 'expediee', label: 'Expédiée' },
-  { value: 'livree', label: 'Livrée' },
-  { value: 'annulee', label: 'Annulée' },
+  { value: 'confirmee', label: 'Confirmee' },
+  { value: 'expediee', label: 'Expediee' },
+  { value: 'livree', label: 'Livree' },
+  { value: 'annulee', label: 'Annulee' },
 ] as const

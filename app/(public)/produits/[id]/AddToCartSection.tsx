@@ -16,10 +16,10 @@ export function AddToCartSection({ produit }: AddToCartSectionProps) {
   const handleAdd = () => {
     addItem({
       id: produit.id,
-      type: 'produit',
-      nom: produit.nom,
-      prix: produit.prix,
-      quantite,
+      item_type: 'product',
+      title: produit.nom || produit.name || 'Produit',
+      price: Number(produit.prix ?? produit.price ?? 0),
+      quantity: quantite,
       image_url: produit.image_url,
     })
   }

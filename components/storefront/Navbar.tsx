@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import { NavbarMobile } from './NavbarMobile'
+import { NavbarCartButton } from './NavbarCartButton'
+import { LanguageSwitcher } from './LanguageSwitcher'
+import { NavbarLinks } from './NavbarLinks'
 
 export async function Navbar() {
   noStore()
@@ -10,53 +13,46 @@ export async function Navbar() {
   const supabase = createClient()
   const { data: settings } = await supabase
     .from('settings')
-    .select('logo_url')
+    .select('*')
     .eq('id', 1)
     .single()
 
   const logoUrl = settings?.logo_url || null
 
   return (
-    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 min-w-0 w-[calc(100%-40px)] max-w-[400px] md:min-w-[480px] md:w-fit md:max-w-[700px]">
-      <div className="flex items-center justify-between w-full bg-white rounded-full shadow-lg border border-[#d6c2c1] px-6 py-[10px]">
-        <div className="w-11 flex items-center justify-start">
+    <div className="fixed left-1/2 top-5 z-50 w-[calc(100%-40px)] max-w-[430px] min-w-0 -translate-x-1/2 md:w-fit md:min-w-[640px] md:max-w-[860px]">
+      <div className="flex w-full items-center justify-between rounded-full border border-white/50 bg-white/85 px-5 py-[10px] shadow-lg backdrop-blur">
+        <div className="flex w-11 items-center justify-start">
           <Link
-            href="/"
-            className="h-11 w-11 rounded-full bg-[#855050] flex items-center justify-center overflow-hidden flex-shrink-0"
+            href="/#top"
+            className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#9F2638]"
           >
             {logoUrl ? (
               <Image
                 src={logoUrl}
-                alt=""
+                alt={settings?.site_name || ''}
                 width={44}
                 height={44}
                 className="h-full w-full object-cover"
                 unoptimized
               />
             ) : (
-              <span className="font-serif text-white text-lg font-bold">3</span>
+              <span className="text-lg font-bold text-white">{settings?.site_name?.[0] || ''}</span>
             )}
           </Link>
         </div>
 
-        <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="/"
-            className="font-sans text-[15px] text-[#271718] hover:text-[#855050] transition-colors duration-300"
-          >
-            Accueil
-          </Link>
-          <Link
-            href="/shop"
-            className="font-sans text-[15px] text-[#271718] hover:text-[#855050] transition-colors duration-300"
-          >
-            Boutique
-          </Link>
+        <div className="hidden items-center gap-5 md:flex">
+          <NavbarLinks settings={settings} />
         </div>
 
-        <div className="w-11 flex items-center justify-end">
+        <div className="flex min-w-[44px] items-center justify-end">
+          <div className="hidden items-center gap-2 md:flex">
+            <LanguageSwitcher />
+            <NavbarCartButton />
+          </div>
           <div className="md:hidden">
-            <NavbarMobile />
+            <NavbarMobile settings={settings} />
           </div>
         </div>
       </div>

@@ -9,8 +9,8 @@ export const metadata = {
 async function getCommande(id: string) {
   const supabase = createClient()
   const { data } = await supabase
-    .from('commandes')
-    .select('*, commande_items(*, produits(*), packs(*))')
+    .from('orders')
+    .select('*, order_items(*)')
     .eq('id', id)
     .single()
   return data
@@ -19,9 +19,7 @@ async function getCommande(id: string) {
 export default async function FacturePage({ params }: { params: { id: string } }) {
   const commande = await getCommande(params.id)
 
-  if (!commande) {
-    notFound()
-  }
+  if (!commande) notFound()
 
   return <FactureClient commande={commande} />
 }

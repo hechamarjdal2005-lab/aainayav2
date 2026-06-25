@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { Resolver, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Modal } from '@/components/ui/Modal'
@@ -42,18 +42,14 @@ export function CategoryModal({ open, onClose, category, onSaved }: CategoryModa
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormData>,
     defaultValues: {
       nom: '',
       slug: '',
     },
   })
-
-  const nomValue = watch('nom')
-
   useEffect(() => {
     if (open) {
       if (category) {
@@ -62,7 +58,7 @@ export function CategoryModal({ open, onClose, category, onSaved }: CategoryModa
         reset({ nom: '', slug: '' })
       }
     }
-  }, [open, category])
+  }, [open, category, reset])
 
   const handleNomChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

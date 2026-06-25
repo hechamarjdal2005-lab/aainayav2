@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Certification } from '@/types'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -8,21 +9,15 @@ import { Table } from '@/components/ui/Table'
 import { CertifModal } from '@/components/admin/CertifModal'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
-
-const iconMap: Record<string, string> = {
-  leaf: '🌿',
-  'map-pin': '📍',
-  heart: '❤️',
-  truck: '🚚',
-  verified: '✅',
-}
+import { Plus, Pencil, Trash2, ImageIcon } from 'lucide-react'
 
 interface CertificationsContentProps {
   certifications: Certification[]
 }
 
-export function CertificationsContent({ certifications: initial }: CertificationsContentProps) {
+export function CertificationsContent({
+  certifications: initial,
+}: CertificationsContentProps) {
   const [certifications, setCertifications] = useState(initial)
   const [modalOpen, setModalOpen] = useState(false)
   const [editCertif, setEditCertif] = useState<Certification | null>(null)
@@ -37,50 +32,87 @@ export function CertificationsContent({ certifications: initial }: Certification
   }
 
   const handleSaved = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('certifications')
       .select('*')
-      .order('ordre')
-    if (data) setCertifications(data)
+      .order('display_order')
+    if (data && !error) {
+      setCertifications(data)
+    } else {
+      const fallback = await supabase
+        .from('certifications')
+        .select('*')
+        .order('ordre')
+      if (fallback.data) setCertifications(fallback.data)
+    }
     router.refresh()
   }
 
+  const canAdd = certifications.length < 3
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-gray-500">
+          {certifications.length}/3 certifications utilisées
+        </p>
         <Button
           onClick={() => {
+            if (!canAdd) return
             setEditCertif(null)
             setModalOpen(true)
           }}
+          disabled={!canAdd}
+          className="bg-[#8B2635] hover:bg-[#7A2333]"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Ajouter une certification
         </Button>
       </div>
+
+      {!canAdd && (
+        <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Maximum 3 certifications autorisées. Supprimez ou modifiez une
+          certification existante.
+        </div>
+      )}
 
       <Card>
         <Table
           columns={[
             {
-              header: 'Icône',
-              accessor: (c: Certification) => (
-                <span className="text-xl">{iconMap[c.icone] || '✅'}</span>
-              ),
+              header: 'Name',
+              accessor: (c: Certification) => c.name || c.nom,
             },
-            { header: 'Nom', accessor: (c: Certification) => c.nom },
             {
-              header: 'Description',
-              accessor: (c: Certification) => c.description || '-',
+              header: 'Image preview',
+              accessor: (c: Certification) =>
+                c.logo_url ? (
+                  <Image
+                    src={c.logo_url}
+                    alt={c.name || c.nom}
+                    width={56}
+                    height={56}
+                    className="h-14 w-14 rounded-lg bg-white object-contain p-2"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-surface">
+                    <ImageIcon className="h-5 w-5 text-outline-variant" />
+                  </div>
+                ),
             },
-            { header: 'Ordre', accessor: (c: Certification) => c.ordre },
+            {
+              header: 'Order',
+              accessor: (c: Certification) => c.display_order ?? c.ordre ?? 0,
+            },
             {
               header: 'Active',
               accessor: (c: Certification) =>
                 c.is_active ? (
-                  <span className="text-green-600 font-medium">Oui</span>
+                  <span className="font-medium text-green-600">Oui</span>
                 ) : (
-                  <span className="text-red-500 font-medium">Non</span>
+                  <span className="font-medium text-red-500">Non</span>
                 ),
             },
             {
@@ -93,12 +125,14 @@ export function CertificationsContent({ certifications: initial }: Certification
                       setModalOpen(true)
                     }}
                     className="text-primary hover:text-primary-dark"
+                    aria-label="Modifier"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(c.id)}
                     className="text-red-500 hover:text-red-700"
+                    aria-label="Supprimer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -120,6 +154,7 @@ export function CertificationsContent({ certifications: initial }: Certification
         }}
         certification={editCertif}
         onSaved={handleSaved}
+        currentCount={certifications.length}
       />
     </div>
   )

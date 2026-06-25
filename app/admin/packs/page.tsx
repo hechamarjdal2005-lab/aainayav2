@@ -7,7 +7,13 @@ async function getPacks() {
     .from('packs')
     .select('*, pack_produits(*, produits(*))')
     .order('created_at', { ascending: false })
-  return data || []
+  if (data) return data
+
+  const fallback = await supabase
+    .from('packs')
+    .select('*, pack_items(*, products(*))')
+    .order('created_at', { ascending: false })
+  return fallback.data || []
 }
 
 export default async function PacksPage() {

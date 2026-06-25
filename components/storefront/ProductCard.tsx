@@ -1,81 +1,72 @@
 'use client'
 
 import { Produit } from '@/types'
-import { formatPrix } from '@/lib/utils'
 import { useCart } from '@/context/CartContext'
-import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingBag } from 'lucide-react'
+import Image from 'next/image'
+import { localized, useLanguage } from '@/context/LanguageContext'
 
 interface ProductCardProps {
   produit: Produit
+  buttonLabel?: string
 }
 
-export function ProductCard({ produit }: ProductCardProps) {
+export function ProductCard({ produit, buttonLabel }: ProductCardProps) {
   const { addItem } = useCart()
+  const { language, isArabic } = useLanguage()
+  const title = localized(language, produit.name_fr || produit.nom, produit.name_ar)
+  const description = localized(language, produit.description_fr || produit.description, produit.description_ar)
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     addItem({
       id: produit.id,
-      type: 'produit',
-      nom: produit.nom,
-      prix: produit.prix,
-      quantite: 1,
+      item_type: 'product',
+      title,
+      price: Number(produit.prix ?? produit.price ?? 0),
+      quantity: 1,
       image_url: produit.image_url,
     })
   }
 
   return (
-    <Link
-      href={`/produits/${produit.id}`}
-      className="group block rounded-xl bg-surface-card border border-outline-variant/20 overflow-hidden hover:shadow-lg transition-all duration-300"
-    >
-      <div className="aspect-square relative overflow-hidden bg-surface">
-        {produit.image_url ? (
+    <Link href={`/produits/${produit.id}`} className="group block">
+      <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-[#F3DDD8] transition-all hover:-translate-y-1 hover:shadow-xl">
+        <div className="relative h-[260px] overflow-hidden bg-[#F3DDD8] md:h-[340px] xl:h-[380px]">
           <Image
-            src={produit.image_url}
-            alt={produit.nom}
+            src={produit.image_url || '/placeholder.jpg'}
+            alt={produit.nom || produit.name || 'Produit'}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            unoptimized
           />
-        ) : (
-          <div className="flex items-center justify-center h-full text-outline-variant">
-            <span className="text-4xl">🌸</span>
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        {produit.categories && (
-          <span className="text-xs text-primary font-medium uppercase tracking-wide">
-            {produit.categories.nom}
-          </span>
-        )}
-        <h3 className="font-serif text-lg font-semibold text-on-surface mt-1">
-          {produit.nom}
-        </h3>
-        <p className="text-sm text-on-surface-variant mt-1 line-clamp-2">
-          {produit.description}
-        </p>
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-lg font-bold text-primary">
-            {formatPrix(produit.prix)}
-          </span>
-          <span
-            className={`text-xs ${produit.stock > 0 ? 'text-green-600' : 'text-red-500'}`}
-          >
-            {produit.stock > 0 ? 'En stock' : 'Rupture'}
-          </span>
         </div>
-        <button
-          onClick={handleAddToCart}
-          disabled={produit.stock === 0}
-          className="mt-3 w-full h-10 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          Ajouter au panier
-        </button>
+
+        <div className={`p-6 ${isArabic ? 'text-right' : 'text-left'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#C8945B]">
+            {produit.categories?.nom}
+          </span>
+          <h3 className="mt-2 line-clamp-1 text-xl font-bold text-[#3B2420]">
+            {title}
+          </h3>
+          <p className="mt-2 line-clamp-2 min-h-[40px] text-sm leading-relaxed text-[#3B2420]/55">
+            {description}
+          </p>
+          <div className="mt-5">
+            <span className="text-2xl font-bold text-[#9F2638]">
+              {Number(produit.prix ?? produit.price ?? 0).toFixed(0)} MAD
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={produit.stock === 0}
+            className="mt-5 w-full rounded-full bg-[#9F2638] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#B64A5A] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {buttonLabel || ''}
+          </button>
+        </div>
       </div>
     </Link>
   )

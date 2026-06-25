@@ -1,5 +1,6 @@
 import { PublicClientShell } from '@/components/storefront/PublicClientShell'
 import { Footer } from '@/components/storefront/Footer'
+import { LanguageProvider } from '@/context/LanguageContext'
 
 export default function PublicLayout({
   children,
@@ -7,9 +8,11 @@ export default function PublicLayout({
   children: React.ReactNode
 }) {
   return (
-    <PublicClientShell>
-      {children}
-      <Footer />
-    </PublicClientShell>
+    <LanguageProvider>
+      <PublicClientShell>
+        {children}
+        <Footer />
+      </PublicClientShell>
+    </LanguageProvider>
   )
 }

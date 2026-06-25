@@ -4,8 +4,8 @@ import { CommandesContent } from './CommandesContent'
 async function getCommandes() {
   const supabase = createClient()
   const { data } = await supabase
-    .from('commandes')
-    .select('*, commande_items(*, produits(*), packs(*))')
+    .from('orders')
+    .select('*, order_items(*)')
     .order('created_at', { ascending: false })
   return data || []
 }

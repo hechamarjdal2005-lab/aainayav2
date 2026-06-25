@@ -16,134 +16,138 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
   const router = useRouter()
 
   return (
-    <div
-      className={`fixed inset-0 z-50 ${open ? '' : 'pointer-events-none'}`}
-    >
-      {/* Backdrop */}
+    <div className={`fixed inset-0 z-[100] ${open ? '' : 'pointer-events-none'}`}>
       <div
-        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out ${
+        className={`absolute inset-0 bg-[#3B2420]/35 backdrop-blur-sm transition-opacity duration-300 ${
           open ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={onClose}
       />
 
-      {/* Panel */}
-      <div
-        className={`absolute top-0 right-0 h-full w-[420px] max-w-full bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      <aside
+        className={`absolute right-0 top-0 flex h-full w-[440px] max-w-full flex-col bg-[#FAF4EF] shadow-2xl transition-transform duration-300 ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 flex-shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#F3DDD8] bg-white px-6 py-5">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-primary" />
-            <h2 className="font-serif text-lg font-semibold">Mon Panier</h2>
-            <span className="text-sm text-on-surface-variant">({totalItems})</span>
+            <ShoppingBag className="h-5 w-5 text-[#9F2638]" />
+            <h2 className="text-xl font-bold text-[#3B2420]">Mon Panier</h2>
+            <span className="text-sm text-[#3B2420]/60">({totalItems})</span>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-on-surface-variant hover:text-on-surface transition-colors"
+            className="rounded-full p-2 text-[#3B2420]/60 transition-colors hover:bg-[#F3DDD8] hover:text-[#9F2638]"
+            aria-label="Fermer le panier"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Items list */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
           {items.length === 0 ? (
-            <div className="text-center py-12 text-on-surface-variant">
-              <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <div className="py-16 text-center text-[#3B2420]/55">
+              <ShoppingBag className="mx-auto mb-3 h-12 w-12 opacity-30" />
               <p>Votre panier est vide</p>
             </div>
           ) : (
             items.map((item) => (
               <div
-                key={`${item.type}-${item.id}`}
-                className="flex gap-4 py-4 border-b border-outline-variant/10"
+                key={`${item.item_type}-${item.id}`}
+                className="flex gap-4 rounded-2xl bg-white p-3 shadow-sm"
               >
-                <div className="h-20 w-20 rounded-lg bg-surface flex-shrink-0 overflow-hidden">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#F3DDD8]">
                   {item.image_url ? (
                     <Image
                       src={item.image_url}
-                      alt={item.nom}
-                      width={80}
-                      height={80}
-                      className="h-full w-full object-cover"
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-outline-variant text-2xl">
-                      {item.type === 'pack' ? '🎁' : '🌸'}
+                    <div className="flex h-full items-center justify-center text-xl text-[#9F2638]/40">
+                      {item.item_type === 'pack' ? 'Pack' : 'Produit'}
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-on-surface truncate">
-                    {item.nom}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-[#3B2420]">
+                    {item.title}
                   </p>
-                  <p className="text-sm font-semibold text-primary mt-1">
-                    {formatPrix(item.prix)}
+                  <p className="mt-1 text-sm font-bold text-[#9F2638]">
+                    {formatPrix(item.price)}
                   </p>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center border border-outline-variant/40 rounded-lg">
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex items-center rounded-full border border-[#F3DDD8] bg-[#FAF4EF]">
                       <button
+                        type="button"
                         onClick={() =>
-                          updateQuantity(item.id, item.type, Math.max(1, item.quantite - 1))
+                          updateQuantity(
+                            item.id,
+                            item.item_type,
+                            Math.max(1, item.quantity - 1)
+                          )
                         }
-                        className="p-1.5 hover:bg-surface-card transition-colors"
+                        className="p-2 hover:text-[#9F2638]"
+                        aria-label="Diminuer la quantité"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </button>
-                      <span className="px-3 text-sm font-medium min-w-[24px] text-center">
-                        {item.quantite}
+                      <span className="min-w-[28px] px-2 text-center text-sm font-semibold">
+                        {item.quantity}
                       </span>
                       <button
+                        type="button"
                         onClick={() =>
-                          updateQuantity(item.id, item.type, item.quantite + 1)
+                          updateQuantity(item.id, item.item_type, item.quantity + 1)
                         }
-                        className="p-1.5 hover:bg-surface-card transition-colors"
+                        className="p-2 hover:text-[#9F2638]"
+                        aria-label="Augmenter la quantité"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
                     <button
-                      onClick={() => removeItem(item.id, item.type)}
-                      className="text-red-400 hover:text-red-600 transition-colors"
+                      type="button"
+                      onClick={() => removeItem(item.id, item.item_type)}
+                      className="text-red-400 transition-colors hover:text-red-600"
+                      aria-label="Supprimer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-semibold">
-                    {formatPrix(item.prix * item.quantite)}
-                  </p>
-                </div>
+                <p className="shrink-0 text-right text-sm font-bold text-[#3B2420]">
+                  {formatPrix(item.price * item.quantity)}
+                </p>
               </div>
             ))
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-outline-variant/30 px-6 py-4 space-y-3 flex-shrink-0">
+          <div className="shrink-0 space-y-4 border-t border-[#F3DDD8] bg-white px-6 py-5">
             <div className="flex items-center justify-between">
-              <span className="font-medium">Sous-total</span>
-              <span className="text-xl font-bold text-primary">
+              <span className="font-semibold text-[#3B2420]">Total</span>
+              <span className="text-2xl font-bold text-[#9F2638]">
                 {formatPrix(totalPrice)}
               </span>
             </div>
             <button
+              type="button"
               onClick={() => {
                 onClose()
                 router.push('/checkout')
               }}
-              className="w-full h-12 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+              className="flex h-12 w-full items-center justify-center rounded-full bg-[#9F2638] font-semibold text-white transition-colors hover:bg-[#B64A5A]"
             >
-              Passer commande
+              Commander
             </button>
           </div>
         )}
-      </div>
+      </aside>
     </div>
   )
 }

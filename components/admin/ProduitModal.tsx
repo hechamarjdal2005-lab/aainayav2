@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { Resolver, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Modal } from '@/components/ui/Modal'
@@ -10,10 +10,15 @@ import { Button } from '@/components/ui/Button'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Category, Produit } from '@/types'
+import Image from 'next/image'
 
 const schema = z.object({
   nom: z.string().min(1, 'Le nom est requis'),
+  name_fr: z.string().optional(),
+  name_ar: z.string().optional(),
   description: z.string().optional(),
+  description_fr: z.string().optional(),
+  description_ar: z.string().optional(),
   ingredients: z.string().optional(),
   conseils_utilisation: z.string().optional(),
   prix: z.coerce.number().positive('Le prix doit être positif'),
@@ -44,10 +49,14 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
     reset,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormData>,
     defaultValues: {
       nom: '',
+      name_fr: '',
+      name_ar: '',
       description: '',
+      description_fr: '',
+      description_ar: '',
       ingredients: '',
       conseils_utilisation: '',
       prix: 0,
@@ -63,7 +72,11 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
       if (produit) {
         reset({
           nom: produit.nom,
+          name_fr: produit.name_fr || produit.nom,
+          name_ar: produit.name_ar || '',
           description: produit.description || '',
+          description_fr: produit.description_fr || produit.description || '',
+          description_ar: produit.description_ar || '',
           ingredients: produit.ingredients || '',
           conseils_utilisation: produit.conseils_utilisation || '',
           prix: produit.prix,
@@ -89,14 +102,14 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
     const ext = file.name.split('.').pop()
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
     const { data, error } = await supabase.storage
-      .from('produits-images')
+      .from('site-media')
       .upload(fileName, file)
     if (error) {
       console.error(error)
       return null
     }
     const { data: urlData } = supabase.storage
-      .from('produits-images')
+      .from('site-media')
       .getPublicUrl(data.path)
     return urlData.publicUrl
   }
@@ -105,7 +118,7 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
     if (!url) return
     const path = url.split('/').pop()
     if (path) {
-      await supabase.storage.from('produits-images').remove([path])
+      await supabase.storage.from('site-media').remove([path])
     }
   }
 
@@ -164,6 +177,10 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
           error={errors.nom?.message}
           {...register('nom')}
         />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Input id="name_fr" label="Nom FR" {...register('name_fr')} />
+          <Input id="name_ar" label="Nom AR" dir="rtl" {...register('name_ar')} />
+        </div>
 
         <div className="space-y-1">
           <label className="block text-sm font-medium text-on-surface">
@@ -174,6 +191,29 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
             rows={3}
             {...register('description')}
           />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-on-surface">
+              Description FR
+            </label>
+            <textarea
+              className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm text-on-surface"
+              rows={3}
+              {...register('description_fr')}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-on-surface">
+              Description AR
+            </label>
+            <textarea
+              className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-right text-sm text-on-surface"
+              rows={3}
+              dir="rtl"
+              {...register('description_ar')}
+            />
+          </div>
         </div>
 
         <div className="space-y-1">
@@ -235,10 +275,13 @@ export function ProduitModal({ open, onClose, produit, onSaved }: ProduitModalPr
             className="w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
           />
           {imagePreview && (
-            <img
+            <Image
               src={imagePreview}
               alt="Preview"
+              width={128}
+              height={128}
               className="mt-2 h-32 w-32 object-cover rounded-lg"
+              unoptimized
             />
           )}
         </div>

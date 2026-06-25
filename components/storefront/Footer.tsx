@@ -1,17 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
-import { Setting } from '@/types'
-import Link from 'next/link'
-import { Sparkles, Camera, Globe, Video, Music2, BookImage } from 'lucide-react'
+'use client'
 
-async function getSettings(): Promise<Setting | null> {
-  try {
-    const supabase = createClient()
-    const { data } = await supabase.from('settings').select('*').single()
-    return data as Setting | null
-  } catch {
-    return null
-  }
-}
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { Camera, Globe, Video, Music2, BookImage, Sparkles } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { Setting } from '@/types'
+import { localized, useLanguage } from '@/context/LanguageContext'
 
 const socialIcons: {
   key: keyof Setting
@@ -25,19 +19,21 @@ const socialIcons: {
   { key: 'pinterest_url', icon: <BookImage className="h-5 w-5" />, label: 'Pinterest' },
 ]
 
-export async function Footer() {
-  const settings = await getSettings()
+export function Footer() {
+  const [settings, setSettings] = useState<Setting | null>(null)
+  const { language, isArabic } = useLanguage()
 
-  const siteName = settings?.site_name || '3INAYA'
-  const footerDescription =
-    settings?.footer_description ||
-    "L'art du rituel de beauté marocain. Produits naturels artisanaux issus du terroir marocain."
-  const copyright =
-    settings?.footer_copyright ||
-    `© ${new Date().getFullYear()} 3INAYA. Tous droits réservés.`
-  const contactEmail = settings?.contact_email || 'contact@3inaya.ma'
-  const contactPhone = settings?.contact_phone || ''
-  const whatsapp = settings?.whatsapp || ''
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('settings')
+      .select('*')
+      .eq('id', 1)
+      .single()
+      .then(({ data }) => setSettings((data as Setting) || null))
+  }, [])
+
+  if (!settings) return null
 
   const socialLinks = socialIcons
     .map((s) => ({
@@ -48,24 +44,30 @@ export async function Footer() {
     .filter((s) => s.url)
 
   return (
-    <footer className="bg-primary-dark text-white py-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-[#7A2333] text-white" dir={isArabic ? 'rtl' : 'ltr'}>
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="grid grid-cols-1 gap-8 py-12 md:grid-cols-4">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-amber-400" />
-              <span className="font-serif text-xl font-bold">{siteName}</span>
+            <div className="mb-4 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-[#C8945B]" />
+              <span className="text-xl font-bold">{settings.site_name}</span>
             </div>
-            <p className="text-sm text-white/70 max-w-md">{footerDescription}</p>
+            <p className="max-w-md text-sm text-white/75">
+              {localized(
+                language,
+                settings.footer_description_fr || settings.footer_description,
+                settings.footer_description_ar
+              )}
+            </p>
             {socialLinks.length > 0 && (
-              <div className="flex items-center gap-3 mt-4">
+              <div className="mt-4 flex items-center gap-3">
                 {socialLinks.map((link) => (
                   <a
                     key={link.label}
                     href={link.url!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-white/65 transition-colors hover:text-white"
                     aria-label={link.label}
                   >
                     {link.icon}
@@ -76,40 +78,32 @@ export async function Footer() {
           </div>
 
           <div>
-            <h4 className="font-serif font-semibold mb-4">Liens rapides</h4>
-            <div className="space-y-2 text-sm text-white/70">
-              <Link href="/shop" className="block hover:text-white">
-                Boutique
+            <h4 className="mb-4 font-semibold">
+              {localized(language, settings.footer_links_title_fr, settings.footer_links_title_ar)}
+            </h4>
+            <div className="space-y-2 text-sm text-white/75">
+              <Link href="/#produits" className="block hover:text-white">
+                {localized(language, settings.nav_shop_fr, settings.nav_shop_ar)}
               </Link>
-              <Link
-                href="/shop?category=visage"
-                className="block hover:text-white"
-              >
-                Soins visage
+              <Link href="/#packs" className="block hover:text-white">
+                {localized(language, settings.nav_packs_fr, settings.nav_packs_ar)}
               </Link>
-              <Link
-                href="/shop?category=corps"
-                className="block hover:text-white"
-              >
-                Soins corps
-              </Link>
-              <Link
-                href="/shop?category=cheveux"
-                className="block hover:text-white"
-              >
-                Soins cheveux
+              <Link href="/#about" className="block hover:text-white">
+                {localized(language, settings.nav_about_fr, settings.nav_about_ar)}
               </Link>
             </div>
           </div>
 
           <div>
-            <h4 className="font-serif font-semibold mb-4">Contact</h4>
-            <div className="space-y-2 text-sm text-white/70">
-              {contactEmail && <p>{contactEmail}</p>}
-              {contactPhone && <p>{contactPhone}</p>}
-              {whatsapp && (
+            <h4 className="mb-4 font-semibold">
+              {localized(language, settings.footer_contact_title_fr, settings.footer_contact_title_ar)}
+            </h4>
+            <div className="space-y-2 text-sm text-white/75">
+              {settings.contact_email && <p>{settings.contact_email}</p>}
+              {settings.contact_phone && <p>{settings.contact_phone}</p>}
+              {settings.whatsapp && (
                 <a
-                  href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                  href={`https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block hover:text-white"
@@ -117,12 +111,11 @@ export async function Footer() {
                   WhatsApp
                 </a>
               )}
-              <p>Maroc</p>
             </div>
           </div>
         </div>
-        <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm text-white/50">
-          {copyright}
+        <div className="border-t border-white/20 py-5 text-center text-sm text-white/60">
+          {settings.footer_copyright}
         </div>
       </div>
     </footer>

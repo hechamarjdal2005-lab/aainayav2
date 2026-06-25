@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
 
@@ -6,19 +5,32 @@ interface StatsCardProps {
   title: string
   value: string | number
   icon: LucideIcon
+  change?: number
   className?: string
 }
 
-export function StatsCard({ title, value, icon: Icon, className }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  icon: Icon,
+  change = 0,
+  className,
+}: StatsCardProps) {
   return (
-    <Card className={cn('flex items-center gap-4', className)}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon className="h-6 w-6" />
+    <div
+      className={cn(
+        'rounded-2xl border border-gray-100 bg-white p-6 shadow-sm',
+        className
+      )}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-500">{title}</span>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#8B2635]/10">
+          <Icon className="h-5 w-5 text-[#8B2635]" />
+        </div>
       </div>
-      <div>
-        <p className="text-sm text-on-surface-variant">{title}</p>
-        <p className="text-2xl font-bold text-on-surface">{value}</p>
-      </div>
-    </Card>
+      <div className="text-3xl font-bold text-gray-900">{value}</div>
+      <div className="mt-1 text-sm text-green-600">+{change}% ce mois</div>
+    </div>
   )
 }

@@ -17,7 +17,9 @@ interface ProduitsContentProps {
   categories: Category[]
 }
 
-export function ProduitsContent({ produits: initialProduits, categories }: ProduitsContentProps) {
+export function ProduitsContent({
+  produits: initialProduits,
+}: ProduitsContentProps) {
   const [produits, setProduits] = useState(initialProduits)
   const [modalOpen, setModalOpen] = useState(false)
   const [editProduit, setEditProduit] = useState<Produit | null>(null)
@@ -48,8 +50,9 @@ export function ProduitsContent({ produits: initialProduits, categories }: Produ
             setEditProduit(null)
             setModalOpen(true)
           }}
+          className="bg-[#8B2635] hover:bg-[#7A2333]"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Ajouter un produit
         </Button>
       </div>
@@ -64,12 +67,12 @@ export function ProduitsContent({ produits: initialProduits, categories }: Produ
                   <Image
                     src={p.image_url}
                     alt={p.nom}
-                    width={40}
-                    height={40}
-                    className="rounded-lg object-cover h-10 w-10"
+                    width={44}
+                    height={44}
+                    className="h-11 w-11 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="h-10 w-10 rounded-lg bg-surface flex items-center justify-center">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface">
                     <ImageIcon className="h-4 w-4 text-outline-variant" />
                   </div>
                 ),
@@ -88,12 +91,12 @@ export function ProduitsContent({ produits: initialProduits, categories }: Produ
               accessor: (p: Produit) => p.stock,
             },
             {
-              header: 'Actif',
+              header: 'Statut',
               accessor: (p: Produit) =>
                 p.is_active ? (
-                  <span className="text-green-600 font-medium">Oui</span>
+                  <span className="font-medium text-green-600">Actif</span>
                 ) : (
-                  <span className="text-red-500 font-medium">Non</span>
+                  <span className="font-medium text-red-500">Inactif</span>
                 ),
             },
             {
@@ -106,12 +109,14 @@ export function ProduitsContent({ produits: initialProduits, categories }: Produ
                       setModalOpen(true)
                     }}
                     className="text-primary hover:text-primary-dark"
+                    aria-label="Modifier"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(p.id)}
                     className="text-red-500 hover:text-red-700"
+                    aria-label="Supprimer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

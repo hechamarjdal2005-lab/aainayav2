@@ -42,7 +42,7 @@ export default async function ProductDetailPage({
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <Link
-        href="/shop"
+        href="/#produits"
         className="inline-flex items-center gap-2 text-primary hover:text-primary-dark transition-colors mb-8"
       >
         <ArrowLeft className="h-4 w-4" />

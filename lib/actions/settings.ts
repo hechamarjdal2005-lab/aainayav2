@@ -23,7 +23,7 @@ const settingsSchema = z.object({
   about_image_url: z.string().optional(),
   hero_video_url: z.string().optional(),
   logo_url: z.string().optional(),
-})
+}).passthrough()
 
 export type SettingsFormData = z.infer<typeof settingsSchema>
 

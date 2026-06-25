@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { useForm } from 'react-hook-form'
+import { Resolver, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Setting } from '@/types'
@@ -14,9 +14,6 @@ import {
   Settings,
   Globe,
   Camera,
-  Music2,
-  Video,
-  BookImage,
   Sparkles,
   CheckCircle,
   Info,
@@ -42,7 +39,13 @@ const schema = z.object({
   about_image_url: z.string().optional(),
   logo_url: z.string().optional(), // ← زيد هاد السطر
   hero_video_url: z.string().optional(),
-})
+  product_button_fr: z.string().optional(),
+  product_button_ar: z.string().optional(),
+  pack_button_fr: z.string().optional(),
+  pack_button_ar: z.string().optional(),
+}).passthrough()
+
+type SettingsFormData = z.infer<typeof schema> & Record<string, string | undefined>
 
 type Tab = 'general' | 'social' | 'footer' | 'about'
 
@@ -77,8 +80,8 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(schema) as any,
+  } = useForm<SettingsFormData>({
+    resolver: zodResolver(schema) as Resolver<SettingsFormData>,
     defaultValues: {
       site_name: settings?.site_name || '3INAYA',
       tagline_fr: settings?.tagline_fr || '',
@@ -98,6 +101,58 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       about_image_url: settings?.about_image_url || '',
       hero_video_url: settings?.hero_video_url || '',
       logo_url: settings?.logo_url || '',
+      nav_home_fr: settings?.nav_home_fr || '',
+      nav_home_ar: settings?.nav_home_ar || '',
+      nav_shop_fr: settings?.nav_shop_fr || '',
+      nav_shop_ar: settings?.nav_shop_ar || '',
+      nav_packs_fr: settings?.nav_packs_fr || '',
+      nav_packs_ar: settings?.nav_packs_ar || '',
+      nav_about_fr: settings?.nav_about_fr || '',
+      nav_about_ar: settings?.nav_about_ar || '',
+      hero_title_fr: settings?.hero_title_fr || '',
+      hero_title_ar: settings?.hero_title_ar || '',
+      hero_subtitle_fr: settings?.hero_subtitle_fr || '',
+      hero_subtitle_ar: settings?.hero_subtitle_ar || '',
+      hero_kicker_fr: settings?.hero_kicker_fr || '',
+      hero_kicker_ar: settings?.hero_kicker_ar || '',
+      hero_button_primary_fr: settings?.hero_button_primary_fr || '',
+      hero_button_primary_ar: settings?.hero_button_primary_ar || '',
+      hero_button_secondary_fr: settings?.hero_button_secondary_fr || '',
+      hero_button_secondary_ar: settings?.hero_button_secondary_ar || '',
+      products_title_fr: settings?.products_title_fr || '',
+      products_title_ar: settings?.products_title_ar || '',
+      products_text_fr: settings?.products_text_fr || '',
+      products_text_ar: settings?.products_text_ar || '',
+      product_button_fr: settings?.product_button_fr || '',
+      product_button_ar: settings?.product_button_ar || '',
+      packs_title_fr: settings?.packs_title_fr || '',
+      packs_title_ar: settings?.packs_title_ar || '',
+      packs_text_fr: settings?.packs_text_fr || '',
+      packs_text_ar: settings?.packs_text_ar || '',
+      pack_button_fr: settings?.pack_button_fr || '',
+      pack_button_ar: settings?.pack_button_ar || '',
+      certifications_title_fr: settings?.certifications_title_fr || '',
+      certifications_title_ar: settings?.certifications_title_ar || '',
+      certifications_text_fr: settings?.certifications_text_fr || '',
+      certifications_text_ar: settings?.certifications_text_ar || '',
+      trust_badge_1_fr: settings?.trust_badge_1_fr || '',
+      trust_badge_1_ar: settings?.trust_badge_1_ar || '',
+      trust_badge_2_fr: settings?.trust_badge_2_fr || '',
+      trust_badge_2_ar: settings?.trust_badge_2_ar || '',
+      trust_badge_3_fr: settings?.trust_badge_3_fr || '',
+      trust_badge_3_ar: settings?.trust_badge_3_ar || '',
+      trust_badge_4_fr: settings?.trust_badge_4_fr || '',
+      trust_badge_4_ar: settings?.trust_badge_4_ar || '',
+      footer_description_fr: settings?.footer_description_fr || '',
+      footer_description_ar: settings?.footer_description_ar || '',
+      footer_links_title_fr: settings?.footer_links_title_fr || '',
+      footer_links_title_ar: settings?.footer_links_title_ar || '',
+      footer_contact_title_fr: settings?.footer_contact_title_fr || '',
+      footer_contact_title_ar: settings?.footer_contact_title_ar || '',
+      primary_color: settings?.primary_color || '#9F2638',
+      secondary_color: settings?.secondary_color || '#B64A5A',
+      gold_color: settings?.gold_color || '#C8945B',
+      background_color: settings?.background_color || '#FAF4EF',
     },
   })
 
@@ -110,13 +165,13 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       const ext = file.name.split('.').pop()
       const fileName = `about-${Date.now()}.${ext}`
       const { data, error } = await supabase.storage
-        .from('brand-assets')
+        .from('site-media')
         .upload(fileName, file)
 
       if (error) throw error
 
       const { data: urlData } = supabase.storage
-        .from('brand-assets')
+        .from('site-media')
         .getPublicUrl(data.path)
 
       const url = urlData.publicUrl
@@ -144,13 +199,13 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       const ext = file.name.split('.').pop()
       const fileName = `hero-${Date.now()}.${ext}`
       const { data, error } = await supabase.storage
-        .from('hero-video')
+        .from('site-media')
         .upload(fileName, file)
 
       if (error) throw error
 
       const { data: urlData } = supabase.storage
-        .from('hero-video')
+        .from('site-media')
         .getPublicUrl(data.path)
 
       const url = urlData.publicUrl
@@ -172,13 +227,13 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       const ext = file.name.split('.').pop()
       const fileName = `logo-${Date.now()}.${ext}`
       const { data, error } = await supabase.storage
-        .from('logo')
+        .from('site-media')
         .upload(fileName, file)
 
       if (error) throw error
 
       const { data: urlData } = supabase.storage
-        .from('logo')
+        .from('site-media')
         .getPublicUrl(data.path)
 
       const url = urlData.publicUrl
@@ -203,7 +258,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     if (videoInputRef.current) videoInputRef.current.value = ''
   }
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: SettingsFormData) => {
     setSaving(true)
     setSuccess(false)
 
@@ -291,6 +346,55 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             placeholder="+2126XXXXXXXX"
             {...register('whatsapp')}
           />
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Input id="nav_home_fr" label="Navbar Accueil FR" {...register('nav_home_fr')} />
+            <Input id="nav_home_ar" label="Navbar Accueil AR" dir="rtl" {...register('nav_home_ar')} />
+            <Input id="nav_shop_fr" label="Navbar Boutique FR" {...register('nav_shop_fr')} />
+            <Input id="nav_shop_ar" label="Navbar Boutique AR" dir="rtl" {...register('nav_shop_ar')} />
+            <Input id="nav_packs_fr" label="Navbar Coffrets FR" {...register('nav_packs_fr')} />
+            <Input id="nav_packs_ar" label="Navbar Coffrets AR" dir="rtl" {...register('nav_packs_ar')} />
+            <Input id="nav_about_fr" label="Navbar A propos FR" {...register('nav_about_fr')} />
+            <Input id="nav_about_ar" label="Navbar A propos AR" dir="rtl" {...register('nav_about_ar')} />
+            <Input id="primary_color" label="Couleur principale" type="color" {...register('primary_color')} />
+            <Input id="secondary_color" label="Couleur secondaire" type="color" {...register('secondary_color')} />
+            <Input id="gold_color" label="Couleur or" type="color" {...register('gold_color')} />
+            <Input id="background_color" label="Couleur fond" type="color" {...register('background_color')} />
+            <Input id="hero_title_fr" label="Hero titre FR" {...register('hero_title_fr')} />
+            <Input id="hero_title_ar" label="Hero titre AR" dir="rtl" {...register('hero_title_ar')} />
+            <Input id="hero_subtitle_fr" label="Hero sous-titre FR" {...register('hero_subtitle_fr')} />
+            <Input id="hero_subtitle_ar" label="Hero sous-titre AR" dir="rtl" {...register('hero_subtitle_ar')} />
+            <Input id="hero_kicker_fr" label="Hero texte court FR" {...register('hero_kicker_fr')} />
+            <Input id="hero_kicker_ar" label="Hero texte court AR" dir="rtl" {...register('hero_kicker_ar')} />
+            <Input id="hero_button_primary_fr" label="Bouton principal FR" {...register('hero_button_primary_fr')} />
+            <Input id="hero_button_primary_ar" label="Bouton principal AR" dir="rtl" {...register('hero_button_primary_ar')} />
+            <Input id="hero_button_secondary_fr" label="Bouton secondaire FR" {...register('hero_button_secondary_fr')} />
+            <Input id="hero_button_secondary_ar" label="Bouton secondaire AR" dir="rtl" {...register('hero_button_secondary_ar')} />
+            <Input id="products_title_fr" label="Titre produits FR" {...register('products_title_fr')} />
+            <Input id="products_title_ar" label="Titre produits AR" dir="rtl" {...register('products_title_ar')} />
+            <Input id="products_text_fr" label="Texte produits FR" {...register('products_text_fr')} />
+            <Input id="products_text_ar" label="Texte produits AR" dir="rtl" {...register('products_text_ar')} />
+            <Input id="product_button_fr" label="Bouton produit FR" {...register('product_button_fr')} />
+            <Input id="product_button_ar" label="Bouton produit AR" dir="rtl" {...register('product_button_ar')} />
+            <Input id="packs_title_fr" label="Titre packs FR" {...register('packs_title_fr')} />
+            <Input id="packs_title_ar" label="Titre packs AR" dir="rtl" {...register('packs_title_ar')} />
+            <Input id="packs_text_fr" label="Texte packs FR" {...register('packs_text_fr')} />
+            <Input id="packs_text_ar" label="Texte packs AR" dir="rtl" {...register('packs_text_ar')} />
+            <Input id="pack_button_fr" label="Bouton pack FR" {...register('pack_button_fr')} />
+            <Input id="pack_button_ar" label="Bouton pack AR" dir="rtl" {...register('pack_button_ar')} />
+            <Input id="certifications_title_fr" label="Titre certifications FR" {...register('certifications_title_fr')} />
+            <Input id="certifications_title_ar" label="Titre certifications AR" dir="rtl" {...register('certifications_title_ar')} />
+            <Input id="certifications_text_fr" label="Texte certifications FR" {...register('certifications_text_fr')} />
+            <Input id="certifications_text_ar" label="Texte certifications AR" dir="rtl" {...register('certifications_text_ar')} />
+            <Input id="trust_badge_1_fr" label="Badge 1 FR" {...register('trust_badge_1_fr')} />
+            <Input id="trust_badge_1_ar" label="Badge 1 AR" dir="rtl" {...register('trust_badge_1_ar')} />
+            <Input id="trust_badge_2_fr" label="Badge 2 FR" {...register('trust_badge_2_fr')} />
+            <Input id="trust_badge_2_ar" label="Badge 2 AR" dir="rtl" {...register('trust_badge_2_ar')} />
+            <Input id="trust_badge_3_fr" label="Badge 3 FR" {...register('trust_badge_3_fr')} />
+            <Input id="trust_badge_3_ar" label="Badge 3 AR" dir="rtl" {...register('trust_badge_3_ar')} />
+            <Input id="trust_badge_4_fr" label="Badge 4 FR" {...register('trust_badge_4_fr')} />
+            <Input id="trust_badge_4_ar" label="Badge 4 AR" dir="rtl" {...register('trust_badge_4_ar')} />
+          </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-on-surface">
@@ -493,6 +597,40 @@ export function SettingsForm({ settings }: SettingsFormProps) {
               {...register('footer_description')}
             />
           </div>
+
+          <Input
+            id="footer_description_fr"
+            label="Description footer FR"
+            {...register('footer_description_fr')}
+          />
+          <Input
+            id="footer_description_ar"
+            label="Description footer AR"
+            dir="rtl"
+            {...register('footer_description_ar')}
+          />
+          <Input
+            id="footer_links_title_fr"
+            label="Titre liens FR"
+            {...register('footer_links_title_fr')}
+          />
+          <Input
+            id="footer_links_title_ar"
+            label="Titre liens AR"
+            dir="rtl"
+            {...register('footer_links_title_ar')}
+          />
+          <Input
+            id="footer_contact_title_fr"
+            label="Titre contact FR"
+            {...register('footer_contact_title_fr')}
+          />
+          <Input
+            id="footer_contact_title_ar"
+            label="Titre contact AR"
+            dir="rtl"
+            {...register('footer_contact_title_ar')}
+          />
 
           <Input
             id="footer_copyright"

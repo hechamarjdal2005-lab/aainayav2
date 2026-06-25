@@ -3,11 +3,17 @@ import { CertificationsContent } from './CertificationsContent'
 
 async function getCertifications() {
   const supabase = createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
+    .from('certifications')
+    .select('*')
+    .order('display_order')
+  if (data && !error) return data
+
+  const fallback = await supabase
     .from('certifications')
     .select('*')
     .order('ordre')
-  return data || []
+  return fallback.data || []
 }
 
 export default async function CertificationsPage() {

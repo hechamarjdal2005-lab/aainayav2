@@ -1,33 +1,32 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Gift,
   Award,
-  Tag,
-  Users,
-  BarChart3,
-  Settings,
+  Info,
+  LayoutDashboard,
   LogOut,
+  Package,
+  Settings,
+  ShoppingCart,
   Sparkles,
+  Tags,
+  Users,
+  Boxes,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/commandes', label: 'Commandes', icon: ShoppingCart },
   { href: '/admin/produits', label: 'Produits', icon: Package },
-  { href: '/admin/packs', label: 'Packs', icon: Gift },
-  { href: '/admin/certifications', label: 'Certifications', icon: Award },
-  { href: '/admin/categories', label: 'Catégories', icon: Tag },
+  { href: '/admin/packs', label: 'Packs', icon: Boxes },
+  { href: '/admin/categories', label: 'Catégories', icon: Tags },
+  { href: '/admin/commandes', label: 'Commandes', icon: ShoppingCart },
   { href: '/admin/clients', label: 'Clients', icon: Users },
-  { href: '/admin/statistiques', label: 'Statistiques', icon: BarChart3 },
+  { href: '/admin/certifications', label: 'Certifications', icon: Award },
+  { href: '/admin/about', label: 'À propos', icon: Info },
   { href: '/admin/parametres', label: 'Paramètres', icon: Settings },
 ]
 
@@ -42,27 +41,32 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-sidebar-bg text-white flex flex-col z-40">
-      <div className="flex items-center gap-2 px-6 py-6 border-b border-white/10">
-        <Sparkles className="h-6 w-6 text-amber-400" />
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-gray-100 bg-white text-gray-900">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8B2635] text-white">
+          <Sparkles className="h-5 w-5" />
+        </div>
         <div>
-          <h1 className="text-lg font-serif font-bold">3INAYA</h1>
-          <p className="text-xs text-white/60">Administration</p>
+          <h1 className="font-heading text-lg font-black">3INAYA</h1>
+          <p className="text-xs text-gray-500">Administration</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 space-y-1 px-3 py-4">
         {navItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/admin' && pathname.startsWith(item.href))
+
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
                 isActive
-                  ? 'bg-white/15 text-white font-medium'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
+                  ? 'bg-[#8B2635] font-medium text-white'
+                  : 'text-gray-600 hover:bg-[#8B2635]/10 hover:text-[#8B2635]'
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -75,7 +79,7 @@ export function Sidebar() {
       <div className="px-3 pb-4">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 w-full transition-colors"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors hover:bg-[#8B2635]/10 hover:text-[#8B2635]"
         >
           <LogOut className="h-4 w-4" />
           Déconnexion

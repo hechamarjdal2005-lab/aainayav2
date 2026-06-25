@@ -1,51 +1,30 @@
 'use client'
 
-import { Card } from '@/components/ui/Card'
 import { formatPrix } from '@/lib/utils'
 import {
-  PieChart,
-  Pie,
+  CartesianGrid,
   Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
-  BarChart,
-  Bar,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  CartesianGrid,
 } from 'recharts'
 
-const COLORS = {
-  en_attente: '#f59e0b',
-  confirmee: '#3b82f6',
-  expediee: '#8b5cf6',
-  livree: '#10b981',
-  annulee: '#ef4444',
-}
-
-const STATUT_LABELS: Record<string, string> = {
-  en_attente: 'En attente',
-  confirmee: 'Confirmée',
-  expediee: 'Expédiée',
-  livree: 'Livrée',
-  annulee: 'Annulée',
-}
+const COLORS = ['#8B2635', '#C4956A', '#2C1810', '#10b981', '#6366f1', '#f59e0b']
 
 interface DashboardChartsProps {
-  stats: Record<string, number>
   recentRevenus: { total: number; created_at: string }[]
+  categoryOrders: { name: string; value: number }[]
 }
 
-export function DashboardCharts({ stats, recentRevenus }: DashboardChartsProps) {
-  const pieData = Object.entries(stats)
-    .filter(([, value]) => value > 0)
-    .map(([key, value]) => ({
-      name: STATUT_LABELS[key] || key,
-      value,
-      color: COLORS[key as keyof typeof COLORS] || '#6b7280',
-    }))
-
-  // Aggregate revenus by day
+export function DashboardCharts({
+  recentRevenus,
+  categoryOrders,
+}: DashboardChartsProps) {
   const revenusByDay: Record<string, number> = {}
   recentRevenus.forEach((r) => {
     const day = new Date(r.created_at).toLocaleDateString('fr-FR', {
@@ -55,45 +34,76 @@ export function DashboardCharts({ stats, recentRevenus }: DashboardChartsProps) 
     revenusByDay[day] = (revenusByDay[day] || 0) + Number(r.total)
   })
 
-  const barData = Object.entries(revenusByDay).map(([date, revenu]) => ({
+  const lineData = Object.entries(revenusByDay).map(([date, revenu]) => ({
     date,
     revenu,
   }))
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <h3 className="font-serif text-lg font-semibold mb-4">
-          Statuts des commandes
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <h3 className="mb-4 font-heading text-lg font-black text-gray-900">
+          Chiffre d&apos;affaires
         </h3>
-        {pieData.length > 0 ? (
+        {lineData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={lineData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1e6e2" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip formatter={(value) => formatPrix(Number(value))} />
+              <Line
+                type="monotone"
+                dataKey="revenu"
+                stroke="#8B2635"
+                strokeWidth={3}
+                dot={{ r: 4, fill: '#8B2635' }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="py-20 text-center text-sm text-gray-500">
+            Aucune donnée cette semaine
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <h3 className="mb-4 font-heading text-lg font-black text-gray-900">
+          Commandes par catégorie
+        </h3>
+        {categoryOrders.length > 0 ? (
           <div className="flex items-center gap-4">
-            <ResponsiveContainer width="60%" height={200}>
+            <ResponsiveContainer width="58%" height={280}>
               <PieChart>
                 <Pie
-                  data={pieData}
+                  data={categoryOrders}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
+                  innerRadius={58}
+                  outerRadius={96}
                   dataKey="value"
                 >
-                  {pieData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
+                  {categoryOrders.map((entry, index) => (
+                    <Cell
+                      key={entry.name}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-2">
-              {pieData.map((entry) => (
+              {categoryOrders.map((entry, index) => (
                 <div key={entry.name} className="flex items-center gap-2 text-sm">
                   <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: entry.color }}
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
-                  <span className="text-on-surface-variant">{entry.name}</span>
-                  <span className="font-semibold text-on-surface">
+                  <span className="text-gray-600">{entry.name}</span>
+                  <span className="font-semibold text-gray-900">
                     {entry.value}
                   </span>
                 </div>
@@ -101,34 +111,11 @@ export function DashboardCharts({ stats, recentRevenus }: DashboardChartsProps) 
             </div>
           </div>
         ) : (
-          <p className="text-sm text-on-surface-variant text-center py-8">
+          <p className="py-20 text-center text-sm text-gray-500">
             Aucune donnée
           </p>
         )}
-      </Card>
-
-      <Card>
-        <h3 className="font-serif text-lg font-semibold mb-4">
-          Revenus (7 jours)
-        </h3>
-        {barData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={barData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#d6c2c1" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                formatter={(value) => formatPrix(Number(value))}
-              />
-              <Bar dataKey="revenu" fill="#855050" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="text-sm text-on-surface-variant text-center py-8">
-            Aucune donnée cette semaine
-          </p>
-        )}
-      </Card>
+      </div>
     </div>
   )
 }
